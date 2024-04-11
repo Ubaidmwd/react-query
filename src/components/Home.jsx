@@ -12,7 +12,7 @@ import {
   useToast,
   Button,
 } from "@chakra-ui/react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const fetchData = async (pageId) => {
   try {
@@ -44,7 +44,6 @@ const Home = () => {
 
   return (
     <Container mt={"4"} maxW={"1300px"}>
-      <Text>Current Page: {pageId}</Text>
       {isLoading ? (
         <Grid placeItems={"center"} height={"100vh"}>
           <Spinner />
@@ -54,21 +53,22 @@ const Home = () => {
           {data &&
             data.data &&
             data.data.map((post) => (
-              <Stack
-                p="4"
-                mt={"4"}
-                boxShadow={"md"}
-                borderRadius={"xl"}
-                border={"1px solid #ccc"}
-                key={post.id}
-              >
-                <Flex justify={"space-between"}>
-                  <Text>userId: {post.user_id}</Text>
-                  <Text>postId:{post.id}</Text>
-                </Flex>
-                <Heading>{post.title}</Heading>
-                <Text>{post.body}</Text>
-              </Stack>
+              <Link key={post.id} to={`/posts/${post.id}`}>
+                <Stack
+                  p="4"
+                  mt={"4"}
+                  boxShadow={"md"}
+                  borderRadius={"xl"}
+                  border={"1px solid #ccc"}
+                >
+                  <Flex justify={"space-between"}>
+                    <Text>userId: {post.user_id}</Text>
+                    <Text>postId:{post.id}</Text>
+                  </Flex>
+                  <Heading>{post.title}</Heading>
+                  <Text>{post.body}</Text>
+                </Stack>
+              </Link>
             ))}
           <Flex justify={"space-evenly"} m={"4"}>
             <Button
@@ -82,6 +82,7 @@ const Home = () => {
             >
               Prev
             </Button>
+            <Text>Current Page: {pageId}</Text>
 
             <Button
               colorScheme="pink"
