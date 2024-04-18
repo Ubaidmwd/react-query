@@ -1,14 +1,19 @@
 import React from "react";
 import { Formik } from "formik";
-// import { Form } from 'react-router-dom'
-import { InputControl } from "formik-chakra-ui";
+import {
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+} from "@chakra-ui/react";
+import { Input } from "@chakra-ui/react";
 const AddPost = () => {
   return (
     <div>
       <Formik>
-        <Form>
-          <InputControl />
-        </Form>
+        <FormControl>
+          <Input name="title" placeholder="title" size="md" />
+        </FormControl>
       </Formik>
     </div>
   );
