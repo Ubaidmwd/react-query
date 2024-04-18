@@ -17,8 +17,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 const fetchData = async (pageId) => {
   try {
     const { data } = await axios.get(
-      `https://gorest.co.in/public/v1/posts?page=${pageId}`
+      `https://gorest.co.in/public/v1/users/6856604/posts?page=${pageId}`
     );
+
     return data;
   } catch (error) {
     throw new Error("Unable to fetch data");
