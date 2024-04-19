@@ -13,7 +13,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-
+import AddPost from "../components/AddPost";
 const fetchData = async (pageId) => {
   try {
     const { data } = await axios.get(
@@ -51,6 +51,7 @@ const Home = () => {
         </Grid>
       ) : (
         <>
+          <AddPost />
           {data &&
             data.data &&
             data.data.map((post) => (

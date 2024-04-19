@@ -7,7 +7,6 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import Home from "./components/Home";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Post from "./components/Post";
-import AddPost from "./components/AddPost";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +16,6 @@ const App = () => {
       <ChakraProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<AddPost />} />
             <Route path="/posts/:id" element={<Post />} />
             <Route path="/:id" element={<Home />} />
           </Routes>
