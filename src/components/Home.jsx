@@ -14,17 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AddPost from "../components/AddPost";
-const fetchData = async (pageId) => {
-  try {
-    const { data } = await axios.get(
-      `https://gorest.co.in/public/v1/users/6856604/posts?page=${pageId}`
-    );
-
-    return data;
-  } catch (error) {
-    throw new Error("Unable to fetch data");
-  }
-};
+import { fetchData } from "../api";
 
 const Home = () => {
   const { id } = useParams();

@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/react";
 import React from "react";
 import { Formik, Form, Field } from "formik";
 import {
@@ -9,14 +10,33 @@ import {
   Button,
   Heading,
 } from "@chakra-ui/react";
+import { useMutation, useQueryClient } from "react-query";
+import axios from "axios";
+import { addNewPost } from "../api";
 
 const AddPost = () => {
+  const toast = useToast();
+  const cache = useQueryClient();
+  const { isLoading, data, mutateAsync } = useMutation(
+    "addNewPost",
+    addNewPost,
+    {
+      onSuccess: () => {
+        cache.invalidateQueries("posts");
+      },
+    },
+    {
+      onError: (error) => {
+        toast({ status: "error", title: error.message });
+      },
+    }
+  );
   return (
     <div>
       <Formik
         initialValues={{ title: "", body: "" }}
-        onSubmit={(values) => {
-          console.log("Form submitted:", values);
+        onSubmit={async (values) => {
+          await mutateAsync({ title: values.title, body: values.body });
         }}
       >
         {({ values }) => (
