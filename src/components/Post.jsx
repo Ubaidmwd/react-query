@@ -12,27 +12,22 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-
-const fetchPostData = async (id) => {
-  try {
-    const { data } = await axios.get(
-      `https://gorest.co.in/public/v1/posts/${id}`
-    );
-    return data;
-  } catch (error) {
-    throw new Error("Unable to fetch data");
-  }
-};
+import AddPost from "./AddPost";
+import { fetchPostData } from "../api";
 
 const Post = () => {
   const { id } = useParams();
 
   const toast = useToast();
-  const { data, isLoading } = useQuery(["post", id], () => fetchPostData(id), {
-    onError: (error) => {
-      toast({ status: "error", title: error.message });
-    },
-  });
+  const { data, isLoading } = useQuery(
+    ["post", parseInt(id)],
+    () => fetchPostData(id),
+    {
+      onError: (error) => {
+        toast({ status: "error", title: error.message });
+      },
+    }
+  );
 
   return (
     <Container mt={"4"} maxW={"1300px"}>
@@ -42,20 +37,21 @@ const Post = () => {
         </Grid>
       ) : (
         <>
+          <AddPost isUpdate={true} id={data?.data?.id} />
           <Stack
             p="4"
             mt={"4"}
             boxShadow={"md"}
             borderRadius={"xl"}
             border={"1px solid #ccc"}
-            key={data.data.id}
+            key={data?.data?.id}
           >
             <Flex justify={"space-between"}>
-              <Text>userId: {data.data.user_id}</Text>
-              <Text>postId:{data.data.id}</Text>
+              <Text>userId: {data?.data?.user_id}</Text>
+              <Text>postId:{data?.data?.id}</Text>
             </Flex>
-            <Heading>{data.data.title}</Heading>
-            <Text>{data.data.body}</Text>
+            <Heading>{data?.data?.title}</Heading>
+            <Text>{data?.data?.body}</Text>
           </Stack>
         </>
       )}

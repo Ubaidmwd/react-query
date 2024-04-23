@@ -12,22 +12,49 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
-import { addNewPost } from "../api";
+import { addNewPost, updatePost } from "../api";
 
-const AddPost = () => {
+const AddPost = ({ isUpdate, id }) => {
   const toast = useToast();
   const cache = useQueryClient();
   const { isLoading, data, mutateAsync } = useMutation(
-    "addNewPost",
-    addNewPost,
+    isUpdate ? "updatePost" : "addNewPost",
+    isUpdate ? updatePost : addNewPost,
     {
-      onSuccess: () => {
-        cache.invalidateQueries("posts");
+      onMutate: async (postData) => {
+        // Snapshot the current value
+        const previousPosts = cache.getQueryData("posts");
+
+        // Optimistically update the cache with the new post
+        cache.setQueryData("posts", (oldPosts) => {
+          if (isUpdate) {
+            // If it's an update, update the specific post
+            return oldPosts.map((post) =>
+              post.id === id ? { ...post, ...postData } : post
+            );
+          } else {
+            // If it's a new post, add it to the list
+            return [...oldPosts, { id: Date.now(), ...postData }];
+          }
+        });
+
+        // Return a function to revert the optimistic update
+        return () => cache.setQueryData("posts", previousPosts);
       },
-    },
-    {
-      onError: (error) => {
-        toast({ status: "error", title: error.message });
+      onError: (error, variables, rollback) => {
+        // If there's an error, revert the optimistic update
+        rollback();
+        toast({
+          title: "Error",
+          description: error.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      },
+      onSettled: () => {
+        // After the mutation, refetch the posts to get the latest data
+        cache.invalidateQueries("posts");
       },
     }
   );
@@ -36,13 +63,18 @@ const AddPost = () => {
       <Formik
         initialValues={{ title: "", body: "" }}
         onSubmit={async (values) => {
-          await mutateAsync({ title: values.title, body: values.body });
+          isUpdate
+            ? await mutateAsync({ title: values.title, body: values.body, id })
+            : await mutateAsync({ title: values.title, body: values.body });
         }}
       >
         {({ values }) => (
           <Form>
             <Stack spacing={4} my={4}>
-              <Heading size="lg">Add New Post</Heading>
+              <Heading size="lg">
+                {" "}
+                {isUpdate ? "Update" : "Add New"} Post
+              </Heading>
               <FormControl>
                 <FormLabel htmlFor="title">Title</FormLabel>
                 <Field name="title" as={Input} placeholder="Enter title" />
@@ -56,7 +88,7 @@ const AddPost = () => {
                 type="submit"
                 disabled={!values.title || !values.body}
               >
-                Submit
+                {isUpdate ? "Update" : "Add"} Post
               </Button>
             </Stack>
           </Form>
