@@ -32,6 +32,7 @@ const AddPost = ({ isUpdate, id }) => {
           cache.setQueryData(["post", id], () => {
             return { data: newPost };
           });
+          toast({ status: "success", title: "Success" });
           return { previousPosts };
         }
       },
