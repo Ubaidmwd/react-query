@@ -21,40 +21,26 @@ const AddPost = ({ isUpdate, id }) => {
     isUpdate ? "updatePost" : "addNewPost",
     isUpdate ? updatePost : addNewPost,
     {
-      onMutate: async (postData) => {
-        // Snapshot the current value
-        const previousPosts = cache.getQueryData("posts");
-
-        // Optimistically update the cache with the new post
-        cache.setQueryData("posts", (oldPosts) => {
-          if (isUpdate) {
-            // If it's an update, update the specific post
-            return oldPosts.map((post) =>
-              post.id === id ? { ...post, ...postData } : post
-            );
-          } else {
-            // If it's a new post, add it to the list
-            return [...oldPosts, { id: Date.now(), ...postData }];
-          }
-        });
-
-        // Return a function to revert the optimistic update
-        return () => cache.setQueryData("posts", previousPosts);
+      onSuccess: () => {
+        cache.invalidateQueries("posts");
       },
-      onError: (error, variables, rollback) => {
-        // If there's an error, revert the optimistic update
-        rollback();
-        toast({
-          title: "Error",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+      onMutate: async (newPost) => {
+        if (isUpdate) {
+          await cache.cancelQueries("post");
+          const previousPosts = cache.getQueryData(["post", id]);
+          console.log(newPost);
+          cache.setQueryData(["post", id], () => {
+            return { data: newPost };
+          });
+          return { previousPosts };
+        }
+      },
+      onError: (error, newPost, context) => {
+        cache.setQueryData(["post", id], context.previousPosts);
+        toast({ status: "error", title: error.message });
       },
       onSettled: () => {
-        // After the mutation, refetch the posts to get the latest data
-        cache.invalidateQueries("posts");
+        cache.invalidateQueries(["post", id]);
       },
     }
   );
